@@ -61,4 +61,9 @@ public @interface RequiredRole {
 
 	@Nonbinding
 	String[] value();
+	
+	//Criado para exercício
+	@Nonbinding
+	boolean operacaoAnd() default false;
+
 }

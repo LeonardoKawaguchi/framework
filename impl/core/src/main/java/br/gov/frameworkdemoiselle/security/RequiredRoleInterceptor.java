@@ -79,6 +79,10 @@ public class RequiredRoleInterceptor implements Serializable {
 	 * @throws Exception
 	 *             if there is an error during the role check or during the method's processing
 	 */
+	//No demoiselle, ele vai varrer a lista das roles e vai verificar se ela está nula ou não
+	//caso esteja nula, ele gera um erro null, caso tenha pelo menos 1 item ela passa,
+	//portanto é interessante criarmos, dependendo da regra de negócio, uma outra maneira
+	//para verificação das roles dos usuários.
 	@AroundInvoke
 	public Object manage(final InvocationContext ic) throws Exception {
 		List<String> roles = getRoles(ic);
@@ -90,13 +94,23 @@ public class RequiredRoleInterceptor implements Serializable {
 		}
 
 		List<String> userRoles = new ArrayList<String>();
-
+		
 		for (String role : roles) {
 			if (getSecurityContext().hasRole(role)) {
 				userRoles.add(role);
 			}
 		}
 
+		//Verificação do operador
+		boolean operadores = getOperador(ic);
+		//Validação do operador
+		if (operadores == true) {
+			if (!userRoles.containsAll(roles)) {
+				throw new AuthorizationException(getBundle().getString("does-not-have-role-ui", roles));
+			}
+		}
+		
+		
 		if (userRoles.isEmpty()) {
 			getLogger()
 					.error(getBundle().getString("does-not-have-role", getSecurityContext().getCurrentUser().getName(),
@@ -131,6 +145,13 @@ public class RequiredRoleInterceptor implements Serializable {
 		}
 
 		return Arrays.asList(roles);
+	}
+	
+	private boolean getOperador(InvocationContext ic) {		
+		if(ic.getMethod().getAnnotation(RequiredRole.class).operacaoAnd() == true) {
+			return true;
+		}
+		return false;
 	}
 
 	private SecurityContext getSecurityContext() {
