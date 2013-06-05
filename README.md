@@ -1,5 +1,5 @@
 Demoiselle 2
-=============
+==================
 
 O framework Demoiselle implementa o conceito de framework integrador.
 Seu objetivo é facilitar a construção de aplicações minimizando tempo
